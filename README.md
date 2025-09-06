@@ -1,2 +1,2 @@
-# Expense-Tracker Github Repository
-## Tracks daily expenses
+# Expense-Tracker Readme
+### Tracks daily expenses
