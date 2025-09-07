@@ -1,112 +1,76 @@
-from flask import Flask, render_template, request, redirect, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for
 import csv, os
 from datetime import datetime
 
-# Initialize Flask app
 app = Flask(__name__)
 
-# Path for storing CSV data
 CSV_PATH = os.path.join("data", "expenses.csv")
-
-# Ensure the "data" folder exists
 os.makedirs("data", exist_ok=True)
 
-#Column headers for CSV
 HEADERS = ["date", "amount", "category", "note"]
 
-
-# Initialize CSV file if it doesn't exist
 def init_csv():
-    if not os.path.exists(CSV_PATH):
-        with open(CSV_PATH, mode='w', newline='') as f:
-            writer = csv,writer(f)
-            writer.writerow(HEADERS)
+    # create file with header OR fix an empty file
+    need_header = not os.path.exists(CSV_PATH) or os.path.getsize(CSV_PATH) == 0
+    if need_header:
+        with open(CSV_PATH, "w", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerow(HEADERS)
 
-#Read all expenses from CSV file
+def _parse_date(s):
+    try:
+        return datetime.strptime(s, "%Y-%m-%d")
+    except Exception:
+        return datetime.min  # push bad/missing dates to the bottom
+
 def read_expenses():
-    init_csv() # make sure file exists
+    init_csv()
     rows = []
-    with open(CSV_PATH, "r", newlinwe='', encoding = "utf-8") as f:
+    with open(CSV_PATH, "r", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
+        # If header is wrong, bail out gracefully
+        if reader.fieldnames != HEADERS:
+            # Optionally: rebuild file or just return empty until user fixes it
+            return []
         for r in reader:
-            # Convert amount safely to float
             try:
-                r["amount"] = float(r["amount"])
+                r["amount"] = float((r.get("amount") or 0))
             except ValueError:
                 r["amount"] = 0.0
             rows.append(r)
-
-    # Sort by date descending
-    rows.sort(key=lambda r: r["date"], reverse=True)
+    rows.sort(key=lambda r: _parse_date(r.get("date", "")), reverse=True)
     return rows
 
 
-# Add a new expense entry to the CSV file
-
 def add_expense(date_str, amount, category, note):
-    init_csv()  # make sure file exists
-    with open(CSV_PATH, "a", newline='', encoding="utf-8") as f:
+    init_csv()
+    with open(CSV_PATH, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([date_str, amount, category, note])
 
-# Main route (home page) - shows expenses and form
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-    # Get data from form inputs
         date_str = request.form.get("date") or datetime.now().strftime("%Y-%m-%d")
-        amount = request.form.get("amount", "").strip()# Remove leading/trailing spaces
-        category = request.form.get("category", "").strip() or "Other"
-        note = request.form.get("note", "").strip()
+        amount_raw = (request.form.get("amount") or "").strip()
+        category = (request.form.get("category") or "").strip() or "Other"
+        note = (request.form.get("note") or "").strip()
 
-        # Validate and parse amount
         try:
-            amt = round(float(amount), 2)
-        except:
+            amt = round(float(amount_raw), 2)
+        except (TypeError, ValueError):
             amt = 0.0
 
-        # Normalize date format (YYYY-MM-DD)
         try:
             date_str = datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%m-%d")
-        except:
+        except ValueError:
             date_str = datetime.now().strftime("%Y-%m-%d")
 
         add_expense(date_str, amt, category, note)
-
         return redirect(url_for("index"))
-
-    # If GET request, load all the expenses
 
     expenses = read_expenses()
     total = round(sum(e["amount"] for e in expenses), 2)
-
-    # Render the template with expenses and total
     return render_template("index.html", expenses=expenses, total=total)
 
-# Run the app - in debug mode (auto reload on code changes)
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
