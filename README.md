@@ -12,6 +12,9 @@ A simple web application to record and manage daily expenses. Built with Flask (
 - **Backend:** Python, Flask, CSV storage  
 - **Frontend:** React, Vite  
 - **Other:** CORS enabled for local development  
+<img width="973" height="506" alt="image" src="https://github.com/user-attachments/assets/48b7c8d0-1094-48df-bd97-5a173c751d58" />
+<img width="977" height="483" alt="image" src="https://github.com/user-attachments/assets/053302d7-2504-4e5b-88a5-8f6d05554805" />
+
 
 ## Getting Started
 1. Clone the repository  
