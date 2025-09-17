@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Expense Tracker
 
 A simple web application to record and manage daily expenses. Built with Flask (backend) and React (frontend). Data is stored in a CSV file for lightweight persistence.
@@ -33,3 +33,4 @@ Currently, two official plugins are available:
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 >>>>>>> b100a23 (Initial commit: expense tracker UI)
+
